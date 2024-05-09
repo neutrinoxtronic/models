@@ -60,16 +60,14 @@ class RankingTrainer(base_trainer.Trainer):
 def main(_) -> None:
   """Train and evaluate the Ranking model."""
   params = train_utils.parse_configuration(FLAGS)
+  if params.runtime.mixed_precision_dtype:
+    tf.keras.mixed_precision.set_global_policy(params.runtime.mixed_precision_dtype)
   mode = FLAGS.mode
   model_dir = FLAGS.model_dir
   if 'train' in FLAGS.mode:
     # Pure eval modes do not output yaml files. Otherwise continuous eval job
     # may race against the train job for writing the same file.
     train_utils.serialize_config(params, model_dir)
-
-  if FLAGS.seed is not None:
-    logging.info('Setting tf seed.')
-    tf.random.set_seed(FLAGS.seed)
 
   task = RankingTask(
       params=params.task,
